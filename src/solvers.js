@@ -38,13 +38,17 @@ window.findNRooksSolution = function(n) {
     if (count === n) {
       results.push(newBoard.rows());
       console.log(tempRow, tempCol);
+      return;
       //newBoard.togglePiece(tempRow, tempCol);
     }
 
     for (let i = 0; i < length; i++) {
       for (let j = 0; j < length; j++) {
+        console.log(i, j);
         let currentBoard = newBoard.rows().slice();
+        // debugger;
         let tempBoard = new Board(currentBoard);
+        console.log(tempBoard.rows() + '');
 
         if (tempBoard.rows()[i][j] === 1) {
           continue;
@@ -57,10 +61,21 @@ window.findNRooksSolution = function(n) {
         } else {
           tempBoard.togglePiece(i, j);
         }
+        currentBoard = null;
+        tempBoard = null;
       }
     }
   };
 
+  // board.rows().forEach(function(row, rowInd) {
+  //   row.forEach(function(col, colInd) {
+  //     board.togglePiece(rowInd, colInd);
+  //     console.log(board.rows() + '');
+  //     checkNewBoard(board);
+  //     board.togglePiece(rowInd, colInd);
+  //     console.log(board.rows() + '');
+  //   });
+  // });
   checkNewBoard(board);
   //console.log('Single solution for ' + n + ' rooks:', JSON.stringify(results));
   console.log('solutions ' + results);
