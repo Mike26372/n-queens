@@ -24,61 +24,58 @@ window.makeEmptyMatrix = function(n) {
 
 
 
-window.findNRooksSolution = function(n) {
-  var board = new Board({'n': n});
-  // console.log(board.rows());
-  var results = [];
-  var tempRow = 0;
-  var tempCol = 0;
-
-  var checkNewBoard = function(newBoard) {
-    var count = newBoard.rows().reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
-    var length = newBoard.rows().length;
-
-    if (count === n) {
-      results.push(newBoard.rows());
-      console.log(tempRow, tempCol);
-      return;
-      //newBoard.togglePiece(tempRow, tempCol);
+window.findNRooksSolution = function(n, currentBoard = window.makeEmptyMatrix(n), origN, results = []) {
+  var currentBoardObj = new Board(currentBoard);
+  console.log('N = ' + n);
+  // currentBoardObj = currentBoardObj || new Board({'n': n}); 
+  currentBoardObj.childrenTree = [];
+  if (n === 0) {
+    // NEED TO REFACTOR
+    var numRooks = currentBoardObj.rows().reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
+    // console.log('Current Board at N = 0: ' + currentBoardObj.rows());
+    console.log(numRooks);
+    if (numRooks === origN) {
+      // results.push(currentBoardObj.rows());
+      return currentBoardObj.rows();
     }
-
-    for (let i = 0; i < length; i++) {
-      for (let j = 0; j < length; j++) {
-        console.log(i, j);
-        let currentBoard = newBoard.rows().slice();
-        // debugger;
-        let tempBoard = new Board(currentBoard);
-        console.log(tempBoard.rows() + '');
-
-        if (tempBoard.rows()[i][j] === 1) {
-          continue;
+    return undefined;
+  }
+  // debugger;
+  currentBoardObj.rows().forEach(function(row, rowInd) {
+    row.forEach(function (col, colInd) {
+      // debugger;
+      if (col === 0) {
+        // var newBoard = new Board(currentBoardObj.rows());
+        // newBoard.togglePiece(rowInd, colInd);
+        // newBoard.get(rowInd)[colInd] = 1;
+        currentBoardObj.get(rowInd)[colInd] = 1;
+        // console.log('Board after toggle: ' + newBoard.rows());
+        console.log('Board after toggle: ' + currentBoardObj.rows());
+        // console.log('rooks conflict check: ' + currentBoardObj.hasAnyRooksConflicts());
+        // if (newBoard.hasAnyRooksConflicts() === false) {
+        if (currentBoardObj.hasAnyRooksConflicts() === false) {
+          // window.findNRooksSolution(n - 1, newBoard, n, results);
+          var tempBoard = new Board(currentBoardObj.rows());
+          currentBoardObj.childrenTree.push(tempBoard.rows());
+          // currentBoardObj.childrenTree.push(new Board(currentBoardObj.rows()));
+          var test = new Board(currentBoardObj.rows());
+          console.log('Test board: ' + test.rows());
         }
-
-        tempBoard.togglePiece(i, j);
-
-        if (!tempBoard.hasAnyRooksConflicts()) {
-          checkNewBoard(tempBoard);
-        } else {
-          tempBoard.togglePiece(i, j);
-        }
-        currentBoard = null;
-        tempBoard = null;
+        currentBoardObj.get(rowInd)[colInd] = 0;
+        // newBoard.togglePiece(rowInd, colInd);
       }
-    }
-  };
-
-  // board.rows().forEach(function(row, rowInd) {
-  //   row.forEach(function(col, colInd) {
-  //     board.togglePiece(rowInd, colInd);
-  //     console.log(board.rows() + '');
-  //     checkNewBoard(board);
-  //     board.togglePiece(rowInd, colInd);
-  //     console.log(board.rows() + '');
-  //   });
-  // });
-  checkNewBoard(board);
-  //console.log('Single solution for ' + n + ' rooks:', JSON.stringify(results));
-  console.log('solutions ' + results);
+    });
+  });
+  // Try passing in matrix to findNRooks instead of object; push matrix to children as well
+  console.log('# childrenTree: ' + currentBoardObj.childrenTree.length);
+  console.log(currentBoardObj.childrenTree);
+  currentBoardObj.childrenTree.forEach(function(childArr, ind, arr) {
+    console.log('Child Board: ' + childArr);
+    var temp = findNRooksSolution(n - 1, childArr, n);
+    results.push(temp);
+  });
+  console.log('Results: ');
+  console.log(results[0]);
   return results[0];
 };
 
