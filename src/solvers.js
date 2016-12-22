@@ -24,45 +24,39 @@ window.makeEmptyMatrix = function(n) {
 
 
 
-window.findNRooksSolution = function(n, currentBoard = window.makeEmptyMatrix(n), origN, results = []) {
+window.findNRooksSolution = function(n, currentBoard, origN, results = []) {
+  console.log('currentBoard ', currentBoard);
+  var currentBoard = currentBoard || window.makeEmptyMatrix(n);
   var currentBoardObj = new Board(currentBoard);
   console.log('N = ' + n);
-  // currentBoardObj = currentBoardObj || new Board({'n': n}); 
   currentBoardObj.childrenTree = [];
   if (n === 0) {
     // NEED TO REFACTOR
     var numRooks = currentBoardObj.rows().reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
-    // console.log('Current Board at N = 0: ' + currentBoardObj.rows());
+    // var numRooks = currentBoard.reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
     console.log(numRooks);
     if (numRooks === origN) {
-      // results.push(currentBoardObj.rows());
       return currentBoardObj.rows();
     }
     return undefined;
   }
-  // debugger;
   currentBoardObj.rows().forEach(function(row, rowInd) {
     row.forEach(function (col, colInd) {
-      // debugger;
       if (col === 0) {
-        // var newBoard = new Board(currentBoardObj.rows());
-        // newBoard.togglePiece(rowInd, colInd);
-        // newBoard.get(rowInd)[colInd] = 1;
-        currentBoardObj.get(rowInd)[colInd] = 1;
-        // console.log('Board after toggle: ' + newBoard.rows());
+        // currentBoardObj.get(rowInd)[colInd] = 1; 
+        currentBoardObj.togglePiece(rowInd, colInd);
         console.log('Board after toggle: ' + currentBoardObj.rows());
-        // console.log('rooks conflict check: ' + currentBoardObj.hasAnyRooksConflicts());
-        // if (newBoard.hasAnyRooksConflicts() === false) {
         if (currentBoardObj.hasAnyRooksConflicts() === false) {
-          // window.findNRooksSolution(n - 1, newBoard, n, results);
           var tempBoard = new Board(currentBoardObj.rows());
-          currentBoardObj.childrenTree.push(tempBoard.rows());
-          // currentBoardObj.childrenTree.push(new Board(currentBoardObj.rows()));
+          console.log('49 ', tempBoard.rows());
+          // currentBoardObj.childrenTree.push(tempBoard.rows());
           var test = new Board(currentBoardObj.rows());
-          console.log('Test board: ' + test.rows());
+          //console.log('Test board: ' + test.rows());
+          //console.log('Test', test);
+          currentBoardObj.childrenTree.push(test.rows());
         }
-        currentBoardObj.get(rowInd)[colInd] = 0;
-        // newBoard.togglePiece(rowInd, colInd);
+        // currentBoardObj.get(rowInd)[colInd] = 0;
+        currentBoardObj.togglePiece(rowInd, colInd);
       }
     });
   });
