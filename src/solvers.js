@@ -22,54 +22,97 @@ window.makeEmptyMatrix = function(n) {
   });
 };
 
+window.hasRowConflictAt = function(board, rowIndex) {
+  return board[rowIndex].reduce((acc, curr) => acc + curr, 0) > 1;
+},
 
+    // test if any rows on this board contain conflicts
+window.hasAnyRowConflicts = function(board) {
+  return !!board.reduce((acc, currRow, ind) => acc || this.hasRowConflictAt(board, ind), false);
+},
+
+
+
+// COLUMNS - run from top to bottom
+// --------------------------------------------------------------
+//
+// test if a specific column on this board contains a conflict
+window.hasColConflictAt = function(board, colIndex) {
+  return board.reduce((acc, curr) => acc + curr[colIndex], 0) > 1;
+},
+
+// test if any columns on this board contain conflicts
+window.hasAnyColConflicts = function(board) {
+  return !!board.reduce((acc, currRow, ind) => acc || this.hasColConflictAt(board, ind), false);
+},
+
+
+window.hasAnyRooksConflicts = function(board) {
+  // console.log('In Rooks Conflicts');
+  return this.hasAnyRowConflicts(board) || this.hasAnyColConflicts(board);
+};
 
 window.findNRooksSolution = function(n, currentBoard, origN, results = []) {
-  console.log('currentBoard ', currentBoard);
   var currentBoard = currentBoard || window.makeEmptyMatrix(n);
-  var currentBoardObj = new Board(currentBoard);
-  console.log('N = ' + n);
-  currentBoardObj.childrenTree = [];
+  var numPieces = origN || parseInt(JSON.stringify(n), 10);
+  var childrenTree = [];
+  var results = [];
   if (n === 0) {
-    // NEED TO REFACTOR
-    var numRooks = currentBoardObj.rows().reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
-    // var numRooks = currentBoard.reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
-    console.log(numRooks);
-    if (numRooks === origN) {
-      return currentBoardObj.rows();
+    var numRooks = currentBoard.reduce((acc, curr) => acc + curr.reduce((acc2, curr2) => acc2 + curr2, 0), 0);
+    if (numRooks === numPieces) {
+      return currentBoard;
     }
     return undefined;
   }
-  currentBoardObj.rows().forEach(function(row, rowInd) {
-    row.forEach(function (col, colInd) {
-      if (col === 0) {
-        // currentBoardObj.get(rowInd)[colInd] = 1; 
-        currentBoardObj.togglePiece(rowInd, colInd);
-        console.log('Board after toggle: ' + currentBoardObj.rows());
-        if (currentBoardObj.hasAnyRooksConflicts() === false) {
-          var tempBoard = new Board(currentBoardObj.rows());
-          console.log('49 ', tempBoard.rows());
-          // currentBoardObj.childrenTree.push(tempBoard.rows());
-          var test = new Board(currentBoardObj.rows());
-          //console.log('Test board: ' + test.rows());
-          //console.log('Test', test);
-          currentBoardObj.childrenTree.push(test.rows());
+  var length, i, j, k; 
+  length = currentBoard.length;
+
+  for (i = 0; i < length; i++) {
+    for (j = 0; j < length; j++) {
+      if (currentBoard[i][j] === 0) {
+        currentBoard[i][j] = 1;
+        if (hasAnyRooksConflicts(currentBoard) === false) {
+          var temp = currentBoard.map(function(row) {
+            return row.map(function(value) {
+              return value;
+            });
+          });
+          childrenTree.push(temp);
         }
-        // currentBoardObj.get(rowInd)[colInd] = 0;
-        currentBoardObj.togglePiece(rowInd, colInd);
+        currentBoard[i][j] = 0;
       }
-    });
-  });
-  // Try passing in matrix to findNRooks instead of object; push matrix to children as well
-  console.log('# childrenTree: ' + currentBoardObj.childrenTree.length);
-  console.log(currentBoardObj.childrenTree);
-  currentBoardObj.childrenTree.forEach(function(childArr, ind, arr) {
-    console.log('Child Board: ' + childArr);
-    var temp = findNRooksSolution(n - 1, childArr, n);
-    results.push(temp);
-  });
-  console.log('Results: ');
-  console.log(results[0]);
+    }
+  }
+
+  for (k = 0; k < length; k++) {
+    var temp = findNRooksSolution(n - 1, childrenTree[k], numPieces);
+    if (temp) {
+      results = results.concat([temp]);
+    }
+  }
+
+  // var flatten = function(nestedArray, result) {
+  //   var resultsArr = [];
+  //   var len = nestedArray.length;
+  //   for (var i = 0; i < len; i++) {
+  //     if (Array.isArray(nestedArray[i])) {
+  //       var result = _.flatten(nestedArray[i]);
+  //     } else {
+  //       var result = nestedArray[i];
+  //     }
+  //     resultsArr = resultsArr.concat(result);
+  //   }
+  //   return resultsArr;
+  // };
+
+  // var flattened = flatten(results);
+  // var unflatted = [];
+  // while (flattened.length > 0) {
+  //   unflatted.push(flattened.splice(0, numPieces * numPieces));
+  // }
+
+
+  console.log('90', results);
   return results[0];
 };
 
